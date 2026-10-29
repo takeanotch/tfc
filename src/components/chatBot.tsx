@@ -3332,7 +3332,7 @@ export default function ChatBot() {
               {messages.length === 0 && !isLoading ? (
                 <div className="my-auto pb-4 pt- text-center">
                   <div className="mx-auto mb-2 w-32 [&>*]:max-w-full">
-                    <LottieAnimation />
+                    {/* <LottieAnimation /> */}
                   </div>
                   <h2 className="text-2xl font-semibold tracking-tight">
                     Bonjour{firstName ? `, ${firstName}` : ''}
