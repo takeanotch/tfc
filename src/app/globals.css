@@ -1,0 +1,211 @@
+@tailwind base;  
+@tailwind components; 
+@tailwind utilities; 
+
+@font-face { 
+  font-family: ubuntu;
+  src: url(/lora.ttf);
+}     
+
+@font-face {
+  font-family: serifo;
+  src: url(/lora.ttf);
+} 
+
+@font-face {
+  font-family: second;
+  src: url(/dancing.ttf);
+}
+
+.serifo{
+  font-family: serifo;
+}
+
+/* Ajoutez ce CSS dans votre fichier global ou dans un module CSS */
+/* styles/globals.css */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.line-clamp-4 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+/* Animations douces */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+@keyframes textColorCycle {
+  0% { color: #4B5563; }     /* gris */
+  25% { color: #3B82F6; }    /* bleu */
+  50% { color: #10B981; }    /* vert */
+  75% { color: #F59E0B; }    /* orange */
+  100% { color: #4B5563; }   /* retour au gris */
+}
+
+.text-animated-color {
+  animation: textColorCycle 5s infinite ease-in-out;
+}
+
+/* Dans votre fichier CSS global */
+.hex-clip {
+  clip-path: url(#hexClip);
+  object-fit: cover;
+  object-position: center;
+}
+
+.hexagon-wrapper {
+  position: relative;
+}
+
+.hexagon-image-container {
+  clip-path: url(#hexClip);
+  width: 260px;
+  height: 260px;
+}
+
+.hexagon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hexagon-clip {
+  clip-path: polygon(
+    50% 3.85%,  /* ~10/260 */
+    92.3% 25%,  /* ~240/260 et 65/260 */
+    92.3% 75%,
+    50% 96.15%,
+    7.7% 75%,
+    7.7% 25%
+  );
+  width: 100%;
+  height: 100%;
+}
+
+/* @font-face {
+  font-family: serifo;
+  src: url(/chillen.ttf);
+} */
+
+.serifo{
+  font-family: serifo;
+}
+
+.second{
+  font-family: second;
+}
+
+:root, html, body {
+  background-color: white !important;
+  color: black !important;
+  /* color-scheme retiré : géré dynamiquement par le ThemeSwitch */
+  font-family: ubuntu !important;
+}
+
+html.dark, html.dark body {
+  background-color: #18181b !important; /* zinc-900 */
+  color: #f4f4f5 !important;            /* zinc-100 */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Dans votre globals.css */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;      /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;              /* Chrome, Safari and Opera */
+}
+
+/* ============================================================
+   Scrollbar par défaut — light + dark (toute l'application)
+   ============================================================ */
+
+/* ---------- WebKit (Chrome, Edge, Safari, Opera) ---------- */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Piste : filet très discret au centre */
+*::-webkit-scrollbar-track {
+  background: linear-gradient(
+    to right,
+    transparent calc(50% - 0.5px),
+    rgba(113, 113, 122, 0.18) calc(50% - 0.5px),
+    rgba(113, 113, 122, 0.18) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+*::-webkit-scrollbar-track:horizontal {
+  background: linear-gradient(
+    to bottom,
+    transparent calc(50% - 0.5px),
+    rgba(113, 113, 122, 0.18) calc(50% - 0.5px),
+    rgba(113, 113, 122, 0.18) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+
+/* Curseur — light */
+*::-webkit-scrollbar-thumb {
+  background-color: #d4d4d8;        /* zinc-300 */
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  min-height: 36px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #a1a1aa;        /* zinc-400 */
+}
+
+/* Curseur — dark */
+.dark *::-webkit-scrollbar-thumb {
+  background-color: #52525b;        /* zinc-600 */
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: #71717a;        /* zinc-500 */
+}
+
+/* ---------- Firefox ---------- */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d4d4d8 transparent; /* light */
+  }
+  .dark * {
+    scrollbar-color: #52525b transparent; /* dark */
+  }
+}
