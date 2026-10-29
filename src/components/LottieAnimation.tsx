@@ -10,7 +10,7 @@ export default function LottieAnimation() {
         animationData={animationData}
         loop={true}
         autoplay={true}
-        style={{ height: 150, width: 150 }}
+        style={{ height: 90, width: 90 }}
       />
     </div>
   );
