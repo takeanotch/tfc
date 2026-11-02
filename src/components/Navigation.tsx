@@ -34,6 +34,7 @@
 //   href: string
 //   iconName: IconName
 //   label: string
+//   disabled?: boolean
 // }
 
 // const roleConfig: Record<RoleKey, { label: string; color: ColorKey }> = {
@@ -139,7 +140,8 @@
 //     { href: '/support', iconName: 'headset', label: 'Support' },
 //   ],
 //   student: [
-//     { href: '/chat', iconName: 'bot', label: 'Chat' },
+//     // Chat désactivé pour les étudiants
+//     { href: '/chat', iconName: 'bot', label: 'Chat', disabled: true },
 //     { href: '/tfc/', iconName: 'file', label: 'TFCs' },
 //     { href: '/favorites', iconName: 'thumbtack', label: 'Favorites' },
 //     { href: '/support', iconName: 'headset', label: 'Support' },
@@ -225,6 +227,9 @@
 //     role: user.role,
 //   }
 
+//   // L'assistant IA est désactivé pour les étudiants (barre desktop et mobile)
+//   const chatDisabled = user.role === 'student'
+
 //   return (
 //     <nav className="sticky top-0 z-50 border-b border-zinc-200 bg-white transition-colors duration-300 dark:border-zinc-700 dark:bg-zinc-900">
 //       {/* Pas de `container` : il impose une largeur max par palier et créait de grandes marges sur petit écran */}
@@ -251,6 +256,25 @@
 //             <Link href="/recherche" aria-label="Recherche" title="Recherche" className={ICON_LINK}>
 //               <img src="/search2.png" alt="" className="h-4 w-4 object-contain dark:invert" />
 //             </Link>
+//             {/* Assistant IA : désactivé pour les étudiants */}
+//             {chatDisabled ? (
+//               <span
+//                 aria-disabled="true"
+//                 title="Assistant IA non disponible"
+//                 className={`${ICON_SLOT} cursor-not-allowed rounded-lg opacity-40 grayscale`}
+//               >
+//                 <img src="/ia.png" alt="" className="h-8 w-8 rounded object-cover dark:invert" />
+//               </span>
+//             ) : (
+//               <Link
+//                 href="/chat"
+//                 aria-label="Assistant IA"
+//                 title="Assistant IA"
+//                 className={ICON_LINK}
+//               >
+//                 <img src="/ia.png" alt="" className="h-8 w-8 rounded object-cover dark:invert" />
+//               </Link>
+//             )}
 //           </div>
 
 //           {/* Liens de navigation */}
@@ -338,6 +362,7 @@
 
 import Link from 'next/link'
 import { requireAuth } from '@/utils/session'
+import { supabase } from '@/lib/supabase'
 import { NavLinks } from './NavLinks'
 import { MobileMenu } from './MobileMenu'
 import { RoleIcon } from './RoleIcon'
@@ -475,8 +500,8 @@ const linkConfig: Record<RoleKey, NavItem[]> = {
     { href: '/support', iconName: 'headset', label: 'Support' },
   ],
   student: [
-    // Chat désactivé pour les étudiants
-    { href: '/chat', iconName: 'bot', label: 'Chat', disabled: true },
+    // L'état « désactivé » du chat est calculé dans le composant (voir access_chat)
+    { href: '/chat', iconName: 'bot', label: 'Chat' },
     { href: '/tfc/', iconName: 'file', label: 'TFCs' },
     { href: '/favorites', iconName: 'thumbtack', label: 'Favorites' },
     { href: '/support', iconName: 'headset', label: 'Support' },
@@ -548,7 +573,28 @@ export default async function Navigation() {
   }
   const styles = colorStyles[currentRole.color]
 
-  const roleLinks = linkConfig[user.role as RoleKey] ?? []
+  // Assistant IA : seuls les étudiants sans access_chat sont bloqués.
+  // La valeur vient de la base (le cookie peut être périmé jusqu'à 7 jours).
+  // Requête faite uniquement pour les étudiants : aucun coût pour les autres rôles.
+  let chatDisabled = false
+  if (user.role === 'student') {
+    const { data: dbUser, error } = await supabase
+      .from('users')
+      .select('access_chat')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Navigation: erreur lecture access_chat', error)
+    }
+    // Refus par défaut en cas d'erreur ou d'utilisateur introuvable
+    chatDisabled = dbUser?.access_chat !== true
+  }
+
+  const roleLinks = (linkConfig[user.role as RoleKey] ?? []).map((link) =>
+    link.href === '/chat' ? { ...link, disabled: chatDisabled } : link
+  )
+
   const navigationLinks: NavItem[] = [
     { href: '/', iconName: 'home', label: 'Accueil' },
     ...roleLinks,
@@ -561,9 +607,6 @@ export default async function Navigation() {
     profil_url: user.profil_url ?? null,
     role: user.role,
   }
-
-  // L'assistant IA est désactivé pour les étudiants (barre desktop et mobile)
-  const chatDisabled = user.role === 'student'
 
   return (
     <nav className="sticky top-0 z-50 border-b border-zinc-200 bg-white transition-colors duration-300 dark:border-zinc-700 dark:bg-zinc-900">
@@ -591,11 +634,11 @@ export default async function Navigation() {
             <Link href="/recherche" aria-label="Recherche" title="Recherche" className={ICON_LINK}>
               <img src="/search2.png" alt="" className="h-4 w-4 object-contain dark:invert" />
             </Link>
-            {/* Assistant IA : désactivé pour les étudiants */}
+            {/* Assistant IA : grisé seulement si l'accès n'est pas activé */}
             {chatDisabled ? (
               <span
                 aria-disabled="true"
-                title="Assistant IA non disponible"
+                title="Assistant IA non activé pour votre compte"
                 className={`${ICON_SLOT} cursor-not-allowed rounded-lg opacity-40 grayscale`}
               >
                 <img src="/ia.png" alt="" className="h-8 w-8 rounded object-cover dark:invert" />
@@ -674,6 +717,7 @@ export default async function Navigation() {
             user={mobileUser}
             styles={{ solid: styles.solid, tone: styles.tone }}
             currentRole={currentRole}
+            chatDisabled={chatDisabled}
           />
         </div>
       </div>
